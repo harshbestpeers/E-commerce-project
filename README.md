@@ -1,1 +1,3 @@
 # E-commerce-project
+
+venv/
