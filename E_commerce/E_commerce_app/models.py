@@ -1,56 +1,125 @@
+# models.py
+
 from django.db import models
-import datetime
+from django.contrib.auth.models import User
 
-# Create your models here.
+
 class Customer(models.Model):
-    first_name = models.CharField(max_length=50) 
-    last_name = models.CharField(max_length=50)
-    email = models.EmailField()
-    password = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
+    password = models.CharField(max_length=50)
 
-    def __str__(self): 
-        return f"{self.first_name} {self.last_name}"
+    def __str__(self):
+        return self.first_name
 
     @staticmethod
-    def isExists(self): 
-        if Customer.objects.filter(email=self.email): 
+    def get_customer_by_email(email):
+        try:
+            return Customer.objects.get(email=email)
+        except:
+            return False
+
+    def isExists(self):
+        if Customer.objects.filter(email=self.email):
             return True
-  
+
         return False
 
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.name
 
 class Product(models.Model):
-    name = models.CharField(max_length=60) 
-    price = models.IntegerField(default=0) 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1) 
-    description = models.CharField(max_length=250, default='', blank=True, null=True) 
-    image = models.ImageField(upload_to='')
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True)
+    stock = models.PositiveIntegerField(null=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, related_name="category"
+    )
 
     def __str__(self):
         return self.name
 
 
 class Order(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="products") 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="customers") 
-    quantity = models.IntegerField(default=1) 
-    price = models.IntegerField() 
-    address = models.CharField(max_length=50, default='', blank=True) 
-    phone = models.CharField(max_length=50, default='', blank=True) 
-    date = models.DateField(default=datetime.datetime.today) 
-    status = models.BooleanField(default=False) 
+    customer = models.ForeignKey(
+        Customer, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    date_ordered = models.DateTimeField(auto_now_add=True)
+    complete = models.BooleanField(default=False)
+    transaction_id = models.CharField(max_length=100, null=True)
 
     def __str__(self):
-        return f"{self.product} order by {self.customer}"
+        return str(self.id)
 
-    
+    @property
+    def get_cart_total(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.get_total for item in orderitems])
+        return total
+
+    @property
+    def get_cart_items(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.quantity for item in orderitems])
+        return total
 
 
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField(default=0)
+    date_added = models.DateTimeField(auto_now_add=True)
 
-    
+    def __str__(self):
+        return str(self.product.name)
+
+    @property
+    def get_total(self):
+        total = self.product.price * self.quantity
+        return total
+
+
+class ShippingAddress(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    address = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
+    zipcode = models.CharField(max_length=200)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.address
+
+
+class Image(models.Model):
+    image = models.ImageField(upload_to="static/image")
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+def cart_detail(request):
+    cart = request.session.get("cart", {})
+    products = Product.objects.filter(id__in=cart.keys())
+    cart_items = []
+
+    for product in products:
+        cart_items.append(
+            {
+                "product": product,
+                "quantity": cart[str(product.id)],
+                "total_price": product.price * cart[str(product.id)],
+            }
+        )
+
+    context = {
+        "cart_items": cart_items,
+        "total_price": sum(item["total_price"] for item in cart_items),
+    }
+    return render(request, "store/cart_detail.html", context)
