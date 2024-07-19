@@ -2,29 +2,33 @@
 {% load static %}
 
 {% block head %}
-    <title>Your Shopping Cart</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .total {
-            font-weight: bold;
-            font-size: 1.2em;
-        }
+<title>Your Shopping Cart</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .container{
-            padding-top: 30px;
-        }
-    </style>
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .total {
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .container {
+        padding-top: 30px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -71,7 +75,7 @@
         <br>
         <a href="{% url 'shipping'%}" class="btn btn-warning">Place Order</a>
     </div>
-    
+
     {% endif %}
 </div>
 {% endblock %}

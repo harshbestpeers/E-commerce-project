@@ -4,14 +4,8 @@
     <nav class="navbar">
         {% for x in categories %}
         <a href="{% url 'category' x.id %}" class="brand1">{{x.name}}</a>
-        <!-- <a href="{% url 'home' %}" class="brand1">Mobiles</a>
-        <a href="{% url 'home' %}" class="brand1">Fashion</a>
-        <a href="{% url 'home' %}" class="brand1">Electonics</a>
-        <a href="{% url 'home' %}" class="brand1">Home & Furniture</a>
-        <a href="{% url 'home' %}" class="brand1">Appliances</a>
-        <a href="{% url 'home' %}" class="brand1">Travel</a> -->
         {% endfor %}
-    </nav> 
-    
+    </nav>
+
 </div>
 {% endblock %}

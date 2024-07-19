@@ -1,20 +1,23 @@
 from django import forms
 from .models import Customer, ShippingAddress, Product, Image
 
+
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = '__all__'
+        fields = "__all__"
+
 
 class ShippingAddressForm(forms.ModelForm):
     class Meta:
         model = ShippingAddress
-        fields = ['address', 'city', 'state', 'zipcode']
+        fields = ["address", "city", "state", "zipcode"]
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'price', 'description', 'stock', 'category']
+        fields = ["name", "price", "description", "stock", "category"]
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -37,4 +40,3 @@ class MultipleFileField(forms.FileField):
 
 class FileFieldForm(forms.Form):
     file_field = MultipleFileField()
-

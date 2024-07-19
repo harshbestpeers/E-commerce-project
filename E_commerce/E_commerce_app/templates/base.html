@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     {% block head %}
     {% endblock %}
 </head>
+
 <body>
     <nav class="navbar">
         <div class="navbar-left">
@@ -19,7 +21,7 @@
             <input type="text" placeholder="Search for products, brands and more" class="search-bar">
         </div>
         <div class="navbar-right">
-            
+
             {% if request.session.customer %}
             <div class="dropdown">
                 <a href="#" class="nav-item">Profile <i class="fa fa-caret-down"></i></a>
@@ -31,7 +33,7 @@
 
             {% else %}
             <a href="{% url 'login' %}" class="nav-item">Login</a>
-           {% endif %}
+            {% endif %}
             <div class="dropdown">
                 <a href="#" class="nav-item">More <i class="fa fa-caret-down"></i></a>
                 <div class="dropdown-content">
@@ -48,4 +50,5 @@
     {% block content %}
     {% endblock %}
 </body>
+
 </html>

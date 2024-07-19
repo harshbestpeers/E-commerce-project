@@ -143,37 +143,39 @@ class AddToCart(View):
         request.session["cart"] = cart
         return redirect("cart_detail")
 
+
 class UpdateCart(View):
     def post(self, request, product_id):
-        cart = request.session.get('cart', {})
+        cart = request.session.get("cart", {})
         if str(product_id) in cart:
-            quantity = request.POST.get('quantity')
+            quantity = request.POST.get("quantity")
             if quantity:
                 cart[str(product_id)] = int(quantity)
-                request.session['cart'] = cart
-        return redirect('cart_detail')
+                request.session["cart"] = cart
+        return redirect("cart_detail")
+
 
 class RemoveFromCart(View):
     def get(self, request, product_id):
-        cart = request.session.get('cart', {})
+        cart = request.session.get("cart", {})
         if str(product_id) in cart:
             del cart[str(product_id)]
-            request.session['cart'] = cart
-        return redirect('cart_detail')
-        
+            request.session["cart"] = cart
+        return redirect("cart_detail")
+
+
 class Shipping(View):
     def get(self, request):
         form = ShippingAddressForm()
-        context = {
-            "form":form
-        }
-        return render(request, 'shipping.html', context)
+        context = {"form": form}
+        return render(request, "shipping.html", context)
 
     # def post(self, request):
 
     #     form = MyForm(request.POST)
     #     if form.is_valid():
-    #         order = 
+    #         order =
+
 
 class ProductAndImage(View):
     def post(self, request):
@@ -185,14 +187,11 @@ class ProductAndImage(View):
             images = image_formset.cleaned_data["file_field"]
             for image in images:
                 Image.objects.create(product=product, image=image)
-            return redirect('home')
+            return redirect("home")
 
     def get(self, request):
         product_form = ProductForm()
         image_formset = FileFieldForm()
 
-        context = {
-            'product_form': product_form,
-            'image_formset': image_formset,
-        }
-        return render(request, 'product_and_image.html', context)
+        context = {"product_form": product_form, "image_formset": image_formset}
+        return render(request, "product_and_image.html", context)
