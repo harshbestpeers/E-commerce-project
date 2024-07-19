@@ -54,7 +54,7 @@
                 </td>
                 <td>${{ item.total_price }}</td>
                 <td>
-                    <a href="">Remove</a>
+                    <a href="{% url 'remove_from_cart' item.product.id %}">Remove</a>
                 </td>
             </tr>
             {% empty %}
@@ -68,7 +68,7 @@
     <div class="total">
         <h2>Total: ${{ total_price }}</h2>
     </div>
-    <a href="">Continue Shopping</a>
+    <a href="{% url 'home'  %}">Continue Shopping</a>
     {% endif %}
 </div>
 {% endblock %}
