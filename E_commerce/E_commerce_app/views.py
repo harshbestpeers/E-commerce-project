@@ -141,3 +141,13 @@ class AddToCart(View):
         cart[str(product.id)] = cart.get(str(product.id), 0) + 1
         request.session["cart"] = cart
         return redirect("cart_detail")
+
+class UpdateCart(View):
+    def post(self, request, product_id):
+        cart = request.session.get('cart', {})
+        if str(product_id) in cart:
+            quantity = request.POST.get('quantity')
+            if quantity:
+                cart[str(product_id)] = int(quantity)
+                request.session['cart'] = cart
+        return redirect('cart_detail')
