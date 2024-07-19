@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<style>
+    .form {
+        text-align: center;
+        margin-top: 20px;
+        background-color: aquamarine;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form">
+        <form action="{% url 'shipping'}" method="post">
+            {% csrf_token %}
+            <br>
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-warning">Place Order</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
