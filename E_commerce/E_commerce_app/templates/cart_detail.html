@@ -64,11 +64,14 @@
             {% endfor %}
         </tbody>
     </table>
+    <br>
     {% if cart_items %}
     <div class="total">
         <h2>Total: ${{ total_price }}</h2>
+        <br>
+        <a href="" class="btn btn-warning">Place Order</a>
     </div>
-    <a href="{% url 'home'  %}">Continue Shopping</a>
+    
     {% endif %}
 </div>
 {% endblock %}
