@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<style>
+    .form {
+        text-align: center;
+        margin-top: 20px;
+        background-color: aquamarine;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form">
+        <h1>Upload Product and Images</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ product_form.as_p }}
+
+            
+            {{ image_formset.as_p }}
+
+            <button type="submit" class="btn btn-danger">Upload</button>
+            <br><br>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

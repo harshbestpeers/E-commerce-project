@@ -30,6 +30,9 @@ class Customer(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.name
+
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
@@ -102,24 +105,3 @@ class Image(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-
-def cart_detail(request):
-    cart = request.session.get("cart", {})
-    products = Product.objects.filter(id__in=cart.keys())
-    cart_items = []
-
-    for product in products:
-        cart_items.append(
-            {
-                "product": product,
-                "quantity": cart[str(product.id)],
-                "total_price": product.price * cart[str(product.id)],
-            }
-        )
-
-    context = {
-        "cart_items": cart_items,
-        "total_price": sum(item["total_price"] for item in cart_items),
-    }
-    return render(request, "store/cart_detail.html", context)
