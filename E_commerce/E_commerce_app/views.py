@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.views import View
 from .forms import ShippingAddressForm, ProductForm, FileFieldForm
+from datetime import datetime
 from .models import (
     Customer,
     Product,
@@ -164,18 +165,35 @@ class RemoveFromCart(View):
         return redirect("cart_detail")
 
 
-class Shipping(View):
+class PlaceOrder(View):
     def get(self, request):
         form = ShippingAddressForm()
         context = {"form": form}
         return render(request, "shipping.html", context)
 
-    # def post(self, request):
+    def post(self, request):
+        id = request.session.get("id")
+        customer = Customer.objects.get(id = id)
+        transaction_id = datetime.now().timestamp()
+        cart = request.session["cart"]
 
-    #     form = MyForm(request.POST)
-    #     if form.is_valid():
-    #         order =
+        form = ShippingAddressForm(request.POST)
+        if form.is_valid():
+            order = Order(customer=customer, transaction_id = transaction_id)
+            order.save()
 
+            for key, value in cart.items():
+                product = Product.objects.get(id = key)
+                order_item = OrderItem(order=order, product = product, quantity=value)
+                order_item.save()
+
+            shipping_address = form.save(commit=False)
+            shipping_address.customer = customer
+            shipping_address.order = order
+            shipping_address.save()
+
+            request.session["cart"] = {}
+            return render(request, 'order_confirm.html')
 
 class ProductAndImage(View):
     def post(self, request):

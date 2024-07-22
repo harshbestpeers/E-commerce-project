@@ -15,7 +15,6 @@ urlpatterns = [
         RemoveFromCart.as_view(),
         name="remove_from_cart",
     ),
-    path("shipping/", Shipping.as_view(), name="shipping"),
-    path("shipping/", Shipping.as_view(), name="shipping"),
-    path("product/", ProductAndImage.as_view(), name="product_and_image"),
+    path("PlaceOrder/", PlaceOrder.as_view(), name="place_order"),
+    path("product/", ProductAndImage.as_view(), name="product_and_image")
 ]
