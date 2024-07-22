@@ -72,8 +72,8 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product')
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, related_name='order')
     quantity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -101,7 +101,7 @@ class ShippingAddress(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to="static/image")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product_image')
 
     def __str__(self):
         return str(self.id)

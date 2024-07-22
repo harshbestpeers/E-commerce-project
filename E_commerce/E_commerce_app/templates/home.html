@@ -1,4 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="navbar-2">
     <nav class="navbar">
@@ -6,6 +12,29 @@
         <a href="{% url 'category' x.id %}" class="brand1">{{x.name}}</a>
         {% endfor %}
     </nav>
+
+    <div class="container1">
+        {% for x in product %}
+        <div class="product-card">
+            {% if x.product_image.exists %}
+            <img src="{{ x.product_image.first.image.url }}" alt="{{ x.name }}" >
+            {% else %}
+            <p>No image available</p>
+            {% endif %}
+            <div class="product-info">
+
+                <h1 class="product-title text-truncate mb-md-2">{{ x.name }}</h1>
+
+                <p class="product-description text-truncate mb-4 mb-md-0">
+                    {{x.description}}
+                </p>
+                <p class="product-price">${{x.price}}</p>
+                <button class="add-to-cart">Add to Cart</button>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
 
 </div>
 {% endblock %}

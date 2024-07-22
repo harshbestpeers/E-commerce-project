@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.views import View
 from .forms import ShippingAddressForm, ProductForm, FileFieldForm
+from datetime import datetime
 from .models import (
     Customer,
     Product,
@@ -17,8 +18,9 @@ from django.contrib.auth.hashers import make_password, check_password
 def Main(request):
 
     categories = Category.objects.all()
+    product = Product.objects.all()
     print(categories)
-    context = {"categories": categories}
+    context = {"categories": categories, 'product':product}
     return render(request, "home.html", context)
 
 
@@ -164,18 +166,35 @@ class RemoveFromCart(View):
         return redirect("cart_detail")
 
 
-class Shipping(View):
+class PlaceOrder(View):
     def get(self, request):
         form = ShippingAddressForm()
         context = {"form": form}
         return render(request, "shipping.html", context)
 
-    # def post(self, request):
+    def post(self, request):
+        id = request.session.get("id")
+        customer = Customer.objects.get(id = id)
+        transaction_id = datetime.now().timestamp()
+        cart = request.session["cart"]
 
-    #     form = MyForm(request.POST)
-    #     if form.is_valid():
-    #         order =
+        form = ShippingAddressForm(request.POST)
+        if form.is_valid():
+            order = Order(customer=customer, transaction_id = transaction_id)
+            order.save()
 
+            for key, value in cart.items():
+                product = Product.objects.get(id = key)
+                order_item = OrderItem(order=order, product = product, quantity=value)
+                order_item.save()
+
+            shipping_address = form.save(commit=False)
+            shipping_address.customer = customer
+            shipping_address.order = order
+            shipping_address.save()
+
+            request.session["cart"] = {}
+            return render(request, 'order_confirm.html')
 
 class ProductAndImage(View):
     def post(self, request):
@@ -195,3 +214,22 @@ class ProductAndImage(View):
 
         context = {"product_form": product_form, "image_formset": image_formset}
         return render(request, "product_and_image.html", context)
+
+
+class OrderHistory(View):
+    def get(self, request):
+        id = request.session.get("id")
+        order = Order.objects.filter(customer = id)
+        
+        context = {
+        'order':order
+        }
+        return render(request, 'order_history.html', context)
+
+class OrderHistoryItem(View):
+    def post(self, request, order_id):
+        order_item = OrderItem.objects.filter(order = order_id)
+        context = {
+        'order_item':order_item
+        }
+        return render(request, 'order_items.html', context)

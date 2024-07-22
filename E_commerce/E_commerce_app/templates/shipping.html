@@ -14,7 +14,7 @@
 {% block content %}
 <div class="container">
     <div class="form">
-        <form action="{% url 'shipping'}" method="post">
+        <form action="{% url 'place_order'%}" method="post">
             {% csrf_token %}
             <br>
             {{ form.as_p }}
