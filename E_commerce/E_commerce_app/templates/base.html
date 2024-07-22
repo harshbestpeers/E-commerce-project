@@ -21,12 +21,14 @@
             <input type="text" placeholder="Search for products, brands and more" class="search-bar">
         </div>
         <div class="navbar-right">
+            <a href="{% url 'home' %}" class="nav-item">Home</a>
 
             {% if request.session.customer %}
             <div class="dropdown">
                 <a href="#" class="nav-item">Profile <i class="fa fa-caret-down"></i></a>
                 <div class="dropdown-content">
                     <a href="#">My profile</a>
+                    <a href="{% url 'order_history' %}">Order History</a>
                     <a href="{% url 'logout' %}">logout</a>
                 </div>
             </div>

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 10px;
+            min-height: 50px;
+            border-bottom: #ddd 1px solid;
+        }
+
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+            margin: 0 15px;
+        }
+
+        .order-history {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .order-history h2 {
+            margin-top: 0;
+        }
+
+        .order-history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-history th,
+        .order-history td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .order-history th {
+            background: #f4f4f4;
+        }
+
+        .order-history td img {
+            width: 100px;
+            height: auto;
+        }
+
+        .order-actions a {
+            margin-right: 10px;
+            color: #333;
+            text-decoration: none;
+            border: 1px solid #333;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+
+        .order-actions a:hover {
+            background: #333;
+            color: #fff;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<body>
+
+    <header>
+        <div class="container">
+            <h1>Order History</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="order-history">
+            <h2>Order History</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Products</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for x in order %}
+                    <tr>
+                        <td># {{x.id}}</td>
+                        <td>{{x.date_ordered}}</td>
+                        {% if x.complete %}
+                        <td>Delivered</td>
+                        {% else %}
+                        <td>shipped</td>
+                        {% endif %}
+                        <td>{{ x.get_cart_total }}</td>
+                        <td>{{ x.get_cart_items }}</td>
+
+                        <td>
+                            <form action="{% url 'order_history_item' x.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">View Details</button>
+                        </form>
+                            <a href="{% url 'place_order' %}" class="btn btn-warning">Reorder</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Add more orders as needed -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

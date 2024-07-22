@@ -18,8 +18,9 @@ from django.contrib.auth.hashers import make_password, check_password
 def Main(request):
 
     categories = Category.objects.all()
+    product = Product.objects.all()
     print(categories)
-    context = {"categories": categories}
+    context = {"categories": categories, 'product':product}
     return render(request, "home.html", context)
 
 
@@ -213,3 +214,22 @@ class ProductAndImage(View):
 
         context = {"product_form": product_form, "image_formset": image_formset}
         return render(request, "product_and_image.html", context)
+
+
+class OrderHistory(View):
+    def get(self, request):
+        id = request.session.get("id")
+        order = Order.objects.filter(customer = id)
+        
+        context = {
+        'order':order
+        }
+        return render(request, 'order_history.html', context)
+
+class OrderHistoryItem(View):
+    def post(self, request, order_id):
+        order_item = OrderItem.objects.filter(order = order_id)
+        context = {
+        'order_item':order_item
+        }
+        return render(request, 'order_items.html', context)
