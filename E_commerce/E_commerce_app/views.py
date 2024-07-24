@@ -242,3 +242,38 @@ class Search(View):
         categories = Category.objects.all()
         context = {"categories": categories, 'product':product}
         return render(request, "home.html", context)
+
+class DetailWishlist(View):
+    def get(self, request):
+        wishlist = request.session.get("wishlist", {})
+        products = Product.objects.filter(id__in=wishlist.keys())
+        wishlist_items = []
+
+        for product in products:
+
+            wishlist_items.append(
+                {
+                    "product": product,
+                }
+            )
+
+        context = {
+            "wishlist_items": wishlist_items,
+        }
+        return render(request, "wishlist.html", context)
+
+class AddToWishList(View):
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        wishlist = request.session.get("wishlist", {})
+        wishlist[str(product.id)] = wishlist.get(str(product.id))
+        request.session["wishlist"] = wishlist
+        return redirect("wishlist")
+
+class RemoveFromWishList(View):
+    def get(self, request, product_id):
+        wishlist = request.session.get("wishlist", {})
+        if str(product_id) in wishlist:
+            del wishlist[str(product_id)]
+            request.session["wishlist"] = wishlist
+        return redirect("wishlist")

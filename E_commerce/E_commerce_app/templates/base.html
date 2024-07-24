@@ -28,10 +28,11 @@
 
             {% if request.session.customer %}
             <div class="dropdown">
-                <a href="#" class="nav-item">Profile <i class="fa fa-caret-down"></i></a>
+                <a href="#" class="nav-item">Accounts <i class="fa fa-caret-down"></i></a>
                 <div class="dropdown-content">
                     <a href="#">My profile</a>
                     <a href="{% url 'order_history' %}">Order History</a>
+                    <a href="{% url 'wishlist' %}">Wishlist</a>
                     <a href="{% url 'logout' %}">logout</a>
                 </div>
             </div>

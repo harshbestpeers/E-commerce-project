@@ -19,5 +19,9 @@ urlpatterns = [
     path("product/", ProductAndImage.as_view(), name="product_and_image"),
     path("OrderHistory/", OrderHistory.as_view(), name="order_history"),
     path("OrderHistoryItem/<int:order_id>", OrderHistoryItem.as_view(), name="order_history_item"),
-    path("search/", Search.as_view(), name="search")
+    path("search/", Search.as_view(), name="search"),
+    path("wishlist/", DetailWishlist.as_view(), name="wishlist"),
+    path("add_to_wishlist/<int:product_id>", AddToWishList.as_view(), name="add_to_wishlist"),
+    path("delete_to_wishlist/<int:product_id>", RemoveFromWishList.as_view(), name="delete_to_wishlist")
+
 ]
