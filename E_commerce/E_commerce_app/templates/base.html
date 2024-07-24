@@ -18,7 +18,10 @@
     <nav class="navbar">
         <div class="navbar-left">
             <a href="{% url 'home' %}" class="brand">Flipkart</a>
-            <input type="text" placeholder="Search for products, brands and more" class="search-bar">
+            <form action="{% url 'search'%}" method="Post">{% csrf_token %}
+            <input type="text" placeholder="Search for products, brands and more" class="search-bar" name="search_item">
+            <button type="submit" class="btn btn-primary">Search</a>
+            </form>
         </div>
         <div class="navbar-right">
             <a href="{% url 'home' %}" class="nav-item">Home</a>

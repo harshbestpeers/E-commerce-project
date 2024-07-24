@@ -233,3 +233,12 @@ class OrderHistoryItem(View):
         'order_item':order_item
         }
         return render(request, 'order_items.html', context)
+
+
+class Search(View):
+    def post(self, request):
+        search_item = request.POST.get("search_item")
+        product = Product.objects.filter(name__contains=search_item)
+        categories = Category.objects.all()
+        context = {"categories": categories, 'product':product}
+        return render(request, "home.html", context)

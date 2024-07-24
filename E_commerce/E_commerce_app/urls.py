@@ -18,5 +18,6 @@ urlpatterns = [
     path("PlaceOrder/", PlaceOrder.as_view(), name="place_order"),
     path("product/", ProductAndImage.as_view(), name="product_and_image"),
     path("OrderHistory/", OrderHistory.as_view(), name="order_history"),
-    path("OrderHistoryItem/<int:order_id>", OrderHistoryItem.as_view(), name="order_history_item")
+    path("OrderHistoryItem/<int:order_id>", OrderHistoryItem.as_view(), name="order_history_item"),
+    path("search/", Search.as_view(), name="search")
 ]
