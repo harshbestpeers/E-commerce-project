@@ -18,10 +18,31 @@ urlpatterns = [
     path("PlaceOrder/", PlaceOrder.as_view(), name="place_order"),
     path("product/", ProductAndImage.as_view(), name="product_and_image"),
     path("OrderHistory/", OrderHistory.as_view(), name="order_history"),
-    path("OrderHistoryItem/<int:order_id>", OrderHistoryItem.as_view(), name="order_history_item"),
+    path(
+        "OrderHistoryItem/<int:order_id>",
+        OrderHistoryItem.as_view(),
+        name="order_history_item",
+    ),
     path("search/", Search.as_view(), name="search"),
     path("wishlist/", DetailWishlist.as_view(), name="wishlist"),
-    path("add_to_wishlist/<int:product_id>", AddToWishList.as_view(), name="add_to_wishlist"),
-    path("delete_to_wishlist/<int:product_id>", RemoveFromWishList.as_view(), name="delete_to_wishlist")
-
+    path(
+        "add_to_wishlist/<int:product_id>",
+        AddToWishList.as_view(),
+        name="add_to_wishlist",
+    ),
+    path(
+        "delete_to_wishlist/<int:product_id>",
+        RemoveFromWishList.as_view(),
+        name="delete_to_wishlist",
+    ),
+    path("dummy/", Dummy.as_view(), name="dummy"),
+    # api
+    path("Customer/", CustomerListCreate.as_view(), name="Customer-list-create"),
+    path(
+        "Customer/<int:pk>/",
+        CustomerRetrieveUpdateDestroy.as_view(),
+        name="Customer-detail",
+    ),
+    path("Order/", OrderListCreate.as_view(), name="Order-list-create"),
+    path("Order/<int:pk>/", OrderRetrieveUpdateDestroy.as_view(), name="Order-detail"),
 ]

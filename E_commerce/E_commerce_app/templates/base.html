@@ -19,8 +19,9 @@
         <div class="navbar-left">
             <a href="{% url 'home' %}" class="brand">Flipkart</a>
             <form action="{% url 'search'%}" method="Post">{% csrf_token %}
-            <input type="text" placeholder="Search for products, brands and more" class="search-bar" name="search_item">
-            <button type="submit" class="btn btn-primary">Search</a>
+                <input type="text" placeholder="Search for products, brands and more" class="search-bar"
+                    name="search_item">
+                <button type="submit" class="btn btn-primary">Search</a>
             </form>
         </div>
         <div class="navbar-right">
@@ -49,7 +50,10 @@
                     <a href="#">Download App</a>
                 </div>
             </div>
-            <a href="{% url 'cart_detail' %}" class="nav-item">Cart</a>
+            <a href="{% url 'cart_detail' %}" class="nav-item">
+                &#x1F6D2;
+                <span class="cart-count">{{ request.session.cart|length }}</span>
+            </a>
         </div>
     </nav>
 
