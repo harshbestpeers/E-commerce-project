@@ -60,20 +60,24 @@ class Order(models.Model):
 
     @property
     def get_cart_total(self):
-        orderitems = self.orderitem_set.all()
+        orderitems = self.order.all()
         total = sum([item.get_total for item in orderitems])
         return total
 
     @property
     def get_cart_items(self):
-        orderitems = self.orderitem_set.all()
+        orderitems = self.order.all()
         total = sum([item.quantity for item in orderitems])
         return total
 
 
 class OrderItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product')
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, related_name='order')
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, related_name="product"
+    )
+    order = models.ForeignKey(
+        Order, on_delete=models.SET_NULL, null=True, related_name="order"
+    )
     quantity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -101,7 +105,9 @@ class ShippingAddress(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to="static/image")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='product_image')
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, related_name="product_image"
+    )
 
     def __str__(self):
         return str(self.id)

@@ -3,24 +3,22 @@ from django.http import HttpResponse
 from django.views import View
 from .forms import ShippingAddressForm, ProductForm, FileFieldForm
 from datetime import datetime
-from .models import (
-    Customer,
-    Product,
-    Category,
-    Order,
-    OrderItem,
-    ShippingAddress,
-    Image,
-)
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
+from rest_framework import generics
+from .serializers import *
+from .models import *
 from django.contrib.auth.hashers import make_password, check_password
+from django.db.models.functions import Random
 
 # Create your views here.
 def Main(request):
 
     categories = Category.objects.all()
-    product = Product.objects.all()
+    product = Product.objects.order_by(Random())
     print(categories)
-    context = {"categories": categories, 'product':product}
+    context = {"categories": categories, "product": product}
     return render(request, "home.html", context)
 
 
@@ -146,15 +144,48 @@ class AddToCart(View):
         return redirect("cart_detail")
 
 
+# class UpdateCart(View):
+#     def post(self, request, product_id):
+#         cart = request.session.get("cart", {})
+#         if str(product_id) in cart:
+#             quantity = request.POST.get("quantity")
+#             if quantity:
+#                 cart[str(product_id)] = int(quantity)
+#                 request.session["cart"] = cart
+#         return redirect("cart_detail")
+
+#     def get(self, request, product_id):
+#         print("hello")
+#         return JsonResponse({"message":"hello"})
+
+
 class UpdateCart(View):
-    def post(self, request, product_id):
+    def put(self, request, product_id):
+        print("post")
+        data = json.loads(request.body)
+        quantity = data.get("quantity")
         cart = request.session.get("cart", {})
+        print(request.POST)
         if str(product_id) in cart:
-            quantity = request.POST.get("quantity")
+            print("running")
             if quantity:
+                print(quantity)
                 cart[str(product_id)] = int(quantity)
                 request.session["cart"] = cart
-        return redirect("cart_detail")
+        success = "updated successfully"
+        return HttpResponse(success)
+
+    def get(self, request, product_id):
+        print("hello")
+        return JsonResponse({"message": "hello"})
+
+    def delete(self, request, product_id):
+        cart = request.session.get("cart", {})
+        if str(product_id) in cart:
+            del cart[str(product_id)]
+            request.session["cart"] = cart
+        success = "remove successfully"
+        return HttpResponse(success)
 
 
 class RemoveFromCart(View):
@@ -169,23 +200,38 @@ class RemoveFromCart(View):
 class PlaceOrder(View):
     def get(self, request):
         form = ShippingAddressForm()
-        context = {"form": form}
+        
+        id = request.session["id"]
+        shipping = (
+            ShippingAddress.objects.filter(customer=id)
+            .values(
+                "customer__first_name",
+                "customer__last_name",
+                "city",
+                "address",
+                "state",
+                "zipcode",
+            )
+            .distinct()
+        )
+        print(shipping)
+        context = {"shipping": shipping, "form": form}
         return render(request, "shipping.html", context)
 
     def post(self, request):
         id = request.session.get("id")
-        customer = Customer.objects.get(id = id)
+        customer = Customer.objects.get(id=id)
         transaction_id = datetime.now().timestamp()
         cart = request.session["cart"]
 
         form = ShippingAddressForm(request.POST)
         if form.is_valid():
-            order = Order(customer=customer, transaction_id = transaction_id)
+            order = Order(customer=customer, transaction_id=transaction_id)
             order.save()
 
             for key, value in cart.items():
-                product = Product.objects.get(id = key)
-                order_item = OrderItem(order=order, product = product, quantity=value)
+                product = Product.objects.get(id=key)
+                order_item = OrderItem(order=order, product=product, quantity=value)
                 order_item.save()
 
             shipping_address = form.save(commit=False)
@@ -194,7 +240,8 @@ class PlaceOrder(View):
             shipping_address.save()
 
             request.session["cart"] = {}
-            return render(request, 'order_confirm.html')
+            return render(request, "order_confirm.html")
+
 
 class ProductAndImage(View):
     def post(self, request):
@@ -219,17 +266,98 @@ class ProductAndImage(View):
 class OrderHistory(View):
     def get(self, request):
         id = request.session.get("id")
-        order = Order.objects.filter(customer = id)
-        
-        context = {
-        'order':order
-        }
-        return render(request, 'order_history.html', context)
+        order = Order.objects.filter(customer=id)
+
+        context = {"order": order}
+        return render(request, "order_history.html", context)
+
 
 class OrderHistoryItem(View):
     def post(self, request, order_id):
-        order_item = OrderItem.objects.filter(order = order_id)
-        context = {
-        'order_item':order_item
-        }
-        return render(request, 'order_items.html', context)
+        order_item = OrderItem.objects.filter(order=order_id)
+        context = {"order_item": order_item}
+        return render(request, "order_items.html", context)
+
+
+class Search(View):
+    def post(self, request):
+        search_item = request.POST.get("search_item")
+        product = Product.objects.filter(name__contains=search_item)
+        categories = Category.objects.all()
+        context = {"categories": categories, "product": product}
+        return render(request, "home.html", context)
+
+
+class DetailWishlist(View):
+    def get(self, request):
+        wishlist = request.session.get("wishlist", {})
+        products = Product.objects.filter(id__in=wishlist.keys())
+        wishlist_items = []
+
+        for product in products:
+
+            wishlist_items.append({"product": product})
+
+        context = {"wishlist_items": wishlist_items}
+        return render(request, "wishlist.html", context)
+
+
+class AddToWishList(View):
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        wishlist = request.session.get("wishlist", {})
+        wishlist[str(product.id)] = wishlist.get(str(product.id))
+        request.session["wishlist"] = wishlist
+        return redirect("wishlist")
+
+
+class RemoveFromWishList(View):
+    def get(self, request, product_id):
+        wishlist = request.session.get("wishlist", {})
+        if str(product_id) in wishlist:
+            del wishlist[str(product_id)]
+            request.session["wishlist"] = wishlist
+        return redirect("wishlist")
+
+
+class Dummy(View):
+    def post(self, request, product_id):
+        item_id = request.POST.get("item_id")
+        quantity = request.POST.get("quantity")
+
+        item = get_object_or_404(Product, id=product_id)
+        cart_item, created = Cart.objects.get_or_create(item=item)
+        cart_item.quantity = quantity
+        cart_item.save()
+
+        return JsonResponse(
+            {
+                "item_id": item_id,
+                "quantity": quantity,
+                "total_price": cart_item.total_price(),
+            }
+        )
+
+    def get(self, request):
+        return render(request, "dummy.html")
+
+
+# api
+class CustomerListCreate(generics.ListCreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+
+class CustomerRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+
+class OrderListCreate(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+
+class OrderRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer

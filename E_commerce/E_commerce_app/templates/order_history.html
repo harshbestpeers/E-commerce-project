@@ -120,8 +120,7 @@
                         <td>{{ x.get_cart_items }}</td>
 
                         <td>
-                            <form action="{% url 'order_history_item' x.id %}" method="post">
-                            {% csrf_token %}
+                            <form action="{% url 'order_history_item' x.id %}" method="post">{% csrf_token %}
                             <button type="submit" class="btn btn-primary">View Details</button>
                         </form>
                             <a href="{% url 'place_order' %}" class="btn btn-warning">Reorder</a>

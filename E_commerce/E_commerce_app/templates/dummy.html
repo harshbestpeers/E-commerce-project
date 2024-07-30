@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+
+{% block head %}
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .profile-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .profile-buttons a {
+            text-decoration: none;
+            color: #fff;
+            background: #555;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .profile-buttons a:hover {
+            background: #777;
+        }
+        .profile-buttons i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+        }
+        .account-settings {
+            display: flex;
+            justify-content: space-between;
+        }
+        .account-settings div {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .account-settings a {
+            display: block;
+            text-decoration: none;
+            color: #007BFF;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f4f4f4;
+            text-align: center;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .account-settings a:hover {
+            background: #e2e6ea;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Hey, {{ user.username }}!</h1>
+    </header>
+
+    <div class="container">
+        <div class="profile-buttons">
+            <a href="#" class="btn">
+                <i class="fas fa-box"></i> Orders
+            </a>
+            <a href="#" class="btn">
+                <i class="fas fa-heart"></i> Wishlist
+            </a>
+            <a href="#" class="btn">
+                <i class="fas fa-tag"></i> Coupons
+            </a>
+            <a href="#" class="btn">
+                <i class="fas fa-question-circle"></i> Help Center
+            </a>
+        </div>
+
+        <div class="section ">
+            <h2>Account Settings</h2>
+            <div class="account-settings">
+                <div><a href="#">Edit Profile</a></div>
+                <div><a href="#">Save Cards</a></div>
+                <div><a href="#">Save Address</a></div>
+                <div><a href="#">Select Language</a></div>
+                <div><a href="#">Notification Settings</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include FontAwesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+
+    {% endblock %}

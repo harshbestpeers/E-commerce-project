@@ -29,7 +29,10 @@
                     {{x.description}}
                 </p>
                 <p class="product-price">${{x.price}}</p>
-                <button class="add-to-cart">Add to Cart</button>
+                
+                    <a href="{% url 'add_to_wishlist' x.id %}" class="btn btn-danger" style="width:130px; font-size: 14px;">Add to Wishlist</a>
+                    <a href="{% url 'add_to_cart' x.id %}"class="btn btn-primary" style="width:100px; font-size: 14px;">Add to Cart</a>
+                 
             </div>
         </div>
         {% endfor %}
