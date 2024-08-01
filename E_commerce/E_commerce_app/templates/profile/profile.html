@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="profile-header">
+            <img src="profile-pic.jpg" alt="Profile Picture" class="profile-pic">
+            <h1 class="username">John Doe</h1>
+            <p class="status">"Living the dream!"</p>
+        </div>
+    </header>
+    
+    <main>
+        <section class="profile-info">
+            <h2>Personal Information</h2>
+            <p><strong>Full Name:</strong> John Doe</p>
+            <p><strong>Email:</strong> john.doe@example.com</p>
+            <p><strong>Phone Number:</strong> (123) 456-7890</p>
+            <p><strong>Date of Birth:</strong> January 1, 1990</p>
+        </section>
+
+        <section class="profile-navigation">
+            <button onclick="location.href='edit-profile.html'">Edit Profile</button>
+            <button onclick="location.href='saved-cards.html'">Saved Cards</button>
+            <button onclick="location.href='saved-addresses.html'">Saved Addresses</button>
+            <button onclick="location.href='language-preferences.html'">Language Preferences</button>
+            <button onclick="location.href='notification-settings.html'">Notification Settings</button>
+        </section>
+
+        <section class="account-activity">
+            <h2>Recent Orders</h2>
+            <!-- Order list goes here -->
+
+            <h2>Wishlist</h2>
+            <!-- Wishlist items go here -->
+
+            <h2>Coupons</h2>
+            <!-- Coupons info goes here -->
+        </section>
+    </main>
+
+    <footer>
+        <button onclick="location.href='help-center.html'">Help Center</button>
+        <button onclick="location.href='logout.html'">Logout</button>
+    </footer>
+</body>
+</html>

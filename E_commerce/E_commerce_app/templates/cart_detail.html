@@ -52,14 +52,16 @@
             <tr data-product-id="{{ item.product.id }}">
                 <td id = "product_id" name="product_id" value="{{item.product.id}}">{{item.product.id}}</td>
                 <td>{{ item.product.name }}</td>
-                <td>${{ item.product.price }}</td>
+                <td>&#x20B9;
+                    {{ item.product.price }}</td>
                 <td>
                     
                     <input type="number" name="quantity"  data-id="{{item.product.id}}" value="{{ item.quantity }}" min="1" class="cart-quantity">
                     <button type="submit" class="update-button">Update</button>
                 
                 </td>
-                <td class="item-total-price" id="subtotal">${{ item.total_price }}</td>
+                <td class="item-total-price" id="subtotal">&#x20B9;
+                    {{ item.total_price }}</td>
                 <td>
                     <button class="remove_item" data-id="{{item.product.id}}">Remove</button>
                 </td>
@@ -74,9 +76,10 @@
     <br>
     {% if cart_items %}
     <div class="total">
-        <h2 claa="cart-item-price">Total: $<span id="total-price">{{ total_price }}</span></h2>
+        <h2 claa="cart-item-price">Total: &#x20B9;
+            <span id="total-price">{{ total_price }}</span></h2>
         <br>
-        <a href="{% url 'place_order' %}" class="btn btn-warning">Place Order</a>
+        <a href="{% url 'create-checkout-session' %}" class="btn btn-warning">Place Order</a>
     </div>
     {% endif %}
 </div>
@@ -103,8 +106,9 @@
             },
             success: function(response) {
                 console.log('Success response:', response);
-                $("#total_price").text(response.total_price.total);
-                $("#subtotal").text(response.total_price.total);
+                
+                $("#total-price").text(+response.total_price);
+                $("#subtotal").text(+response.subtotal);
                 $("#response").html('<div class="alert alert-success">Quantity successfully updated...</div>');
             },
             error: function(xhr, status, error) {
