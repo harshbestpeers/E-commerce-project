@@ -123,3 +123,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+STRIPE_PUBLIC_KEY = 'pk_test_51PiACu2KT90gejSaVY7sj44CKFY5MNClPbit8R4AEhDnwu7N4vcveULSKO5G11W7ScQQq5WNDaBe3RMULoI8VM7K009vpMN8UX'
+STRIPE_SECRET_KEY = 'sk_test_51PiACu2KT90gejSamKD5TldwCzIhtBtD6zeG5OFbvPfUQAPhRQuYv1JgE7keYWVkBRGhpE9BgkGu7WPUduFZFFkr00ioYw2H50'
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '2/day',
+        'user': '2/day'
+    }
+}

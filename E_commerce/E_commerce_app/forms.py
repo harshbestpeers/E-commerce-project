@@ -11,7 +11,7 @@ class CustomerForm(forms.ModelForm):
 class ShippingAddressForm(forms.ModelForm):
     class Meta:
         model = ShippingAddress
-        fields = ["address", "city", "state", "zipcode"]
+        fields = "__all__"
 
 
 class ProductForm(forms.ModelForm):

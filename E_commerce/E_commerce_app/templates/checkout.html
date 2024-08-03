@@ -108,6 +108,8 @@
         <div class="step-content" id="step2">
             <h2>Review</h2>
             <p>Please review your order details.</p>
+
+            
             <button type="button" class="btn" onclick="nextStep(1)">Back</button>
             <button type="button" class="btn" onclick="nextStep(3)">Next</button>
         </div>
@@ -150,34 +152,6 @@
         });
         document.querySelector(`#step${step}-header`).classList.add('active');
     }
-
-//     document.getElementById('checkout-button').addEventListener('click', function(e) {
-//     e.preventDefault(); // Prevent the default form submission
-
-//     const formData = new FormData(document.getElementById('checkout-form'));
-//     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-//     fetch('{% url "create-checkout-session" %}', {
-//         method: 'POST',
-//         headers: {
-//             'X-CSRFToken': csrfToken,
-//             'Accept': 'application/json'
-//         },
-//         body: new URLSearchParams(formData)
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.url) {
-//             window.location.href = data.url; // Redirect to Stripe Checkout
-//         } else {
-//             alert('There was an error processing your form. Please try again.');
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//         alert('An error occurred. Please check the console for more details.');
-//     });
-// });
 
 </script>
 
