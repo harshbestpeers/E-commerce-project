@@ -174,23 +174,26 @@ class AddToCart(View):
 
 class UpdateCart(View):
     def put(self, request, product_id):
-        print(product_id)
-        print("post")
         data = json.loads(request.body)
         quantity = data.get("quantity")
         cart = request.session.get("cart", {})
-        print(request.POST)
         if str(product_id) in cart:
-            print("running")
             if quantity:
-                print(quantity)
                 cart[str(product_id)] = int(quantity)
                 request.session["cart"] = cart
                 product = Product.objects.get(id=product_id)
                 subtotal = product.price * cart[str(product.id)]
                 print(subtotal)
 
+        cart = request.session.get("cart", {})
+        total_price = 0
+        for key, value in cart.items():
+            product = Product.objects.get(id=key)
+            total = product.price * cart[str(product.id)]
+            total_price += total
+
         context={
+            "total_price": total_price,
             "subtotal":subtotal,
             "success" : "updated successfully",
             # "total_price": sum(item["total_price"] for item in cart_item),
@@ -207,8 +210,21 @@ class UpdateCart(View):
         if str(product_id) in cart:
             del cart[str(product_id)]
             request.session["cart"] = cart
-        success = "remove successfully"
-        return HttpResponse(success)
+
+        cart = request.session.get("cart", {})
+        total_price = 0
+        for key, value in cart.items():
+            product = Product.objects.get(id=key)
+            total = product.price * cart[str(product.id)]
+            total_price += total
+
+        context = {
+            "total_price":total_price,
+            "success":True,
+            
+        }
+
+        return JsonResponse(context)
 
 
 class RemoveFromCart(View):
@@ -498,7 +514,9 @@ def PaymentSuccess(request):
         product = Product.objects.get(id=key)
         order_item = OrderItem(order=order, product=product, quantity=value)
         order_item.save()
-        product.quantity = int(product.quantity) - value
+
+        
+        
 
 
     context={

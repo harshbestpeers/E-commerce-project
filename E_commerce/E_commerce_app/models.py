@@ -9,7 +9,7 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=200)
     phone_number = models.IntegerField(default="0000000000")
     email = models.EmailField(max_length=200)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=50000)
 
     def __str__(self):
         return self.first_name
