@@ -1,184 +1,100 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block head %}
-<style>
-    .container {
-        background-color: #fff;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 5px;
-        width: 90%;
-        max-width: 600px;
-    }
-
-    .step-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-
-    .step-header div {
-        flex: 1;
-        text-align: center;
-        padding: 10px;
-        border-bottom: 2px solid #ccc;
-    }
-
-    .step-header .active {
-        border-bottom: 2px solid #007bff;
-        font-weight: bold;
-    }
-
-    .step-content {
-        display: none;
-    }
-
-    .step-content.active {
-        display: block;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 10px 20px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-    }
-
-    .btn[disabled] {
-        background-color: #ccc;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="step-header">
-        <div class="step active" id="step1-header">Address</div>
-        <div class="step" id="step2-header">Review</div>
-        <div class="step" id="step3-header">Payment</div>
-        <div class="step" id="step4-header">Confirmation</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Process</title>
+    <style>
+        .section {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+    </style>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <!-- Address Section -->
+    <div id="address-section" class="section active">
+        <h1>Enter Your Address</h1>
+        <form id="address-form">
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" required>
+            <br>
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required>
+            <br>
+            <label for="state">State:</label>
+            <input type="text" id="state" name="state" required>
+            <br>
+            <label for="zipcode">Zipcode:</label>
+            <input type="text" id="zipcode" name="zipcode" required>
+            <br>
+            <button type="button" onclick="nextSection('review')">Next</button>
+        </form>
     </div>
 
-    <!-- <form id="checkout-form"> -->
-    <form id="checkout-form" action="{% url 'create-checkout-session' %}" method="POST">
-        <div class="step-content active" id="step1">
-            <!-- <form id="form1"> -->
-            <h2>Address</h2>
-            <div class="form-group">
-                {% csrf_token %}
-                <label for="street_address">Street Address:</label>
-                <input type="text" id="street_address" name="street_address" required><br><br>
+    <!-- Review Section -->
+    <div id="review-section" class="section">
+        <h1>Review Your Order</h1>
+        <p>Order Details:</p>
+        <!-- Display order details here -->
+        <button type="button" onclick="nextSection('payment')">Proceed to Payment</button>
+    </div>
 
-                <label for="city">City:</label>
-                <input type="text" id="city" name="city" required><br><br>
+    <!-- Payment Section -->
+    <div id="payment-section" class="section">
+        <h1>Payment</h1>
+        <form id="payment-form">
+            <!-- Stripe Elements container -->
+            <div id="card-element"></div>
+            <div id="card-errors" role="alert"></div>
+            <br>
+            <button type="button" onclick="submitPayment()">Pay Now</button>
+        </form>
+    </div>
 
-                <label for="state">State:</label>
-                <input type="text" id="state" name="state" required><br><br>
+    <!-- Confirmation Section -->
+    <div id="confirmation-section" class="section">
+        <h1>Thank You for Your Purchase!</h1>
+        <p>Your order has been successfully processed.</p>
+    </div>
 
-                <label for="zipcode">Zipcode:</label>
-                <input type="text" id="zipcode" name="zipcode" required><br><br>
+    <script>
+        var stripe = Stripe('your_publishable_key');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.mount('#card-element');
 
+        function nextSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`${sectionId}-section`).classList.add('active');
+        }
 
-            </div>
-            <button type="button" class="btn" onclick="nextStep(2)">Next</button>
-            <!-- </form> -->
-        </div>
+        function submitPayment() {
+            stripe.createToken(card).then(function(result) {
+                if (result.error) {
+                    // Display error in #card-errors
+                    var errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = result.error.message;
+                } else {
+                    // Handle successful payment
+                    var form = document.getElementById('payment-form');
+                    var hiddenInput = document.createElement('input');
+                    hiddenInput.setAttribute('type', 'hidden');
+                    hiddenInput.setAttribute('name', 'stripeToken');
+                    hiddenInput.setAttribute('value', result.token.id);
+                    form.appendChild(hiddenInput);
+                    
+                    // Simulate form submission to backend
+                    form.submit();
 
-        <div class="step-content" id="step2">
-            <h2>Review</h2>
-            <p>Please review your order details.</p>
-            <button type="button" class="btn" onclick="nextStep(1)">Back</button>
-            <button type="button" class="btn" onclick="nextStep(3)">Next</button>
-        </div>
-
-        <div class="step-content" id="step3">
-            <h2>Payment</h2>
-            <div class="form-group">
-                <label for="card-number">Card Number</label>
-                <input type="text" id="card-number" name="card_number">
-            </div>
-            <div class="form-group">
-                <label for="expiry-date">Expiry Date</label>
-                <input type="text" id="expiry-date" name="expiry_date">
-            </div>
-            <div class="form-group">
-                <label for="cvv">CVV</label>
-                <input type="text" id="cvv" name="cvv">
-            </div>
-            <button type="button" class="btn" onclick="nextStep(2)">Back</button>
-            <!-- <button type="button" class="btn" onclick="submitForm()">Next</button> -->
-            <button type="submit" id="checkout-button">Checkout</button>
-        </div>
-
-        <div class="step-content" id="step4">
-            <h2>Confirmation</h2>
-            <p>Thank you for your order! Your order has been placed successfully.</p>
-        </div>
-    </form>
-</div>
-
-<script>
-    function nextStep(step) {
-        document.querySelectorAll('.step-content').forEach((content) => {
-            content.classList.remove('active');
-        });
-        document.querySelector(`#step${step}`).classList.add('active');
-
-        document.querySelectorAll('.step-header .step').forEach((header) => {
-            header.classList.remove('active');
-        });
-        document.querySelector(`#step${step}-header`).classList.add('active');
-    }
-
-//     document.getElementById('checkout-button').addEventListener('click', function(e) {
-//     e.preventDefault(); // Prevent the default form submission
-
-//     const formData = new FormData(document.getElementById('checkout-form'));
-//     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-//     fetch('{% url "create-checkout-session" %}', {
-//         method: 'POST',
-//         headers: {
-//             'X-CSRFToken': csrfToken,
-//             'Accept': 'application/json'
-//         },
-//         body: new URLSearchParams(formData)
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.url) {
-//             window.location.href = data.url; // Redirect to Stripe Checkout
-//         } else {
-//             alert('There was an error processing your form. Please try again.');
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//         alert('An error occurred. Please check the console for more details.');
-//     });
-// });
-
-</script>
-
-{% endblock %}
+                    // Show confirmation section
+                    nextSection('confirmation');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

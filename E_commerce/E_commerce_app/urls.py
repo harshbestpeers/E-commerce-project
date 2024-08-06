@@ -10,11 +10,6 @@ urlpatterns = [
     path("cart_detail/", cart_detail, name="cart_detail"),
     path("add_to_cart/<int:product_id>", AddToCart.as_view(), name="add_to_cart"),
     path("update_cart/<int:product_id>", UpdateCart.as_view(), name="update_cart"),
-    path(
-        "remove_from_cart/<int:product_id>",
-        RemoveFromCart.as_view(),
-        name="remove_from_cart",
-    ),
     # path("PlaceOrder/", PlaceOrder.as_view(), name="place_order"),
     path("product/", ProductAndImage.as_view(), name="product_and_image"),
     path("OrderHistory/", OrderHistory.as_view(), name="order_history"),
@@ -37,7 +32,6 @@ urlpatterns = [
     ),
     path("dummy/", Dummy.as_view(), name="dummy"),
     path("account/", Account.as_view(), name="account"),
-
     # api
     path("Customer/", CustomerListCreate.as_view(), name="Customer-list-create"),
     path(
@@ -47,11 +41,12 @@ urlpatterns = [
     ),
     path("Order/", OrderListCreate.as_view(), name="Order-list-create"),
     path("Order/<int:pk>/", OrderRetrieveUpdateDestroy.as_view(), name="Order-detail"),
-    path('payment/', PaymentView.as_view(), name='payment'),
-
-
-    path('create-checkout-session/', CreateCheckoutSessionView.as_view(), name="create-checkout-session"),
+    # path('payment/', PaymentView.as_view(), name='payment'),
+    path(
+        "create-checkout-session/",
+        CreateCheckoutSessionView.as_view(),
+        name="create-checkout-session",
+    ),
     path("payment-success/", PaymentSuccess, name="payment-success"),
     path("payment-cancel/", PaymentCancel, name="payment-cancel"),
-    path("my_webhooks_view/", my_webhooks_view, name="my_webhooks_view"),
 ]

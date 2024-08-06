@@ -157,21 +157,6 @@ class AddToCart(View):
         return redirect("cart_detail")
 
 
-# class UpdateCart(View):
-#     def post(self, request, product_id):
-#         cart = request.session.get("cart", {})
-#         if str(product_id) in cart:
-#             quantity = request.POST.get("quantity")
-#             if quantity:
-#                 cart[str(product_id)] = int(quantity)
-#                 request.session["cart"] = cart
-#         return redirect("cart_detail")
-
-#     def get(self, request, product_id):
-#         print("hello")
-#         return JsonResponse({"message":"hello"})
-
-
 class UpdateCart(View):
     def put(self, request, product_id):
         data = json.loads(request.body)
@@ -225,62 +210,6 @@ class UpdateCart(View):
         }
 
         return JsonResponse(context)
-
-
-class RemoveFromCart(View):
-    def get(self, request, product_id):
-        cart = request.session.get("cart", {})
-        if str(product_id) in cart:
-            del cart[str(product_id)]
-            request.session["cart"] = cart
-        return redirect("cart_detail")
-
-
-# class PlaceOrder(View):
-#     def get(self, request):
-#         form = ShippingAddressForm()
-        
-#         id = request.session["id"]
-#         shipping = (
-#             ShippingAddress.objects.filter(customer=id)
-#             .values(
-#                 "customer__first_name",
-#                 "customer__last_name",
-#                 "city",
-#                 "address",
-#                 "state",
-#                 "zipcode",
-#             )
-#             .distinct()
-#         )
-#         print(shipping)
-#         context = {"shipping": shipping, "form": form}
-#         return render(request, "shipping.html", context)
-
-#     def post(self, request):
-#         id = request.session.get("id")
-#         customer = Customer.objects.get(id=id)
-#         transaction_id = datetime.now().timestamp()
-#         cart = request.session["cart"]
-
-#         form = ShippingAddressForm(request.POST)
-#         if form.is_valid():
-#             order = Order(customer=customer, transaction_id=transaction_id)
-#             order.save()
-
-#             for key, value in cart.items():
-#                 product = Product.objects.get(id=key)
-#                 order_item = OrderItem(order=order, product=product, quantity=value)
-#                 order_item.save()
-
-#             shipping_address = form.save(commit=False)
-#             shipping_address.customer = customer
-#             shipping_address.order = order
-#             shipping_address.save()
-
-#             request.session["cart"] = {}
-#             return render(request, "order_confirm.html")
-
 
 class ProductAndImage(View):
     def post(self, request):
@@ -390,35 +319,10 @@ class Account(View):
         return render(request, "account.html", context)
 
 
+
+
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
-class PaymentView(View):
-    def get(self, request):
-        return render(request, 'payment.html', {
-            'stripe_public_key': settings.STRIPE_PUBLIC_KEY
-        })
-
-    def post(self, request):
-        amount = (request.POST.get('amount'))
-        name = (request.POST.get('name'))
-        amount = int(amount)
-        print(amount)
-        try:
-            charge = stripe.Charge.create(
-                amount=amount,
-                currency='usd',
-                source=request.POST['stripeToken']
-            )
-
-            
-
-            return redirect('payment')
-
-        except stripe.error.StripeError:
-            print("error")
-            return redirect('payment')
-
-
-
 class CreateCheckoutSessionView(generic.View):
     def post(self, request, *args, **kwargs):
         address = request.session.get("address",{})
@@ -469,11 +373,12 @@ class CreateCheckoutSessionView(generic.View):
             payment_method_types = ['card'],
             line_items=line_items,
             mode='payment',
-            success_url=f"http://{host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url="http://{}{}".format(host,reverse("payment-cancel")),
+            # success_url=f"http://{host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+            # cancel_url="http://{}{}".format(host,reverse("payment-cancel")),
         )
         
-        return redirect(checkout_session.url, code=303)
+        # return redirect(checkout_session.url, code=303)
+        redirect("home")
         
 
     def get(self, request):
@@ -537,11 +442,6 @@ def PaymentCancel(request):
     }
     return render(request, "order/conformation.html", context)
 
-@csrf_exempt
-def my_webhooks_view(request):
-    pyload = request.body
-    print(payload)
-    return HttpResponse(status=200)
 
 
 # api
