@@ -1,100 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout Process</title>
+    <title>Multi-Step Form</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
-        .section {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .step.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .step-content {
             display: none;
         }
-        .active {
+
+        .step-content.active {
             display: block;
         }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
+
 <body>
-    <!-- Address Section -->
-    <div id="address-section" class="section active">
-        <h1>Enter Your Address</h1>
-        <form id="address-form">
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" required>
-            <br>
-            <label for="city">City:</label>
-            <input type="text" id="city" name="city" required>
-            <br>
-            <label for="state">State:</label>
-            <input type="text" id="state" name="state" required>
-            <br>
-            <label for="zipcode">Zipcode:</label>
-            <input type="text" id="zipcode" name="zipcode" required>
-            <br>
-            <button type="button" onclick="nextSection('review')">Next</button>
-        </form>
-    </div>
+    <div class="container">
+        <div class="progress-bar">
+            <div class="step completed">Step 1</div>
+            <div class="step">Step 2</div>
+            <div class="step">Step 3</div>
+            <div class="step">Step 4</div>
+        </div>
+        <div class="content">
+            <div id="step-1" class="step-content active">
+                <form id="address-form">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address" required>
 
-    <!-- Review Section -->
-    <div id="review-section" class="section">
-        <h1>Review Your Order</h1>
-        <p>Order Details:</p>
-        <!-- Display order details here -->
-        <button type="button" onclick="nextSection('payment')">Proceed to Payment</button>
-    </div>
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" required>
 
-    <!-- Payment Section -->
-    <div id="payment-section" class="section">
-        <h1>Payment</h1>
-        <form id="payment-form">
-            <!-- Stripe Elements container -->
-            <div id="card-element"></div>
-            <div id="card-errors" role="alert"></div>
-            <br>
-            <button type="button" onclick="submitPayment()">Pay Now</button>
-        </form>
-    </div>
+                    <label for="state">State:</label>
+                    <input type="text" id="state" name="state" required>
 
-    <!-- Confirmation Section -->
-    <div id="confirmation-section" class="section">
-        <h1>Thank You for Your Purchase!</h1>
-        <p>Your order has been successfully processed.</p>
+                    <label for="zipcode">Zipcode:</label>
+                    <input type="number" id="zipcode" name="zipcode" required>
+
+                    <button type="button" onclick="validateAddress()">Next</button>
+                </form>
+            </div>
+            <div id="step-2" class="step-content">
+                <h2>Review Your Details</h2>
+                <button onclick="prevStep()">Previous</button>
+                <button onclick="nextStep()">Next</button>
+            </div>
+            <div id="step-3" class="step-content">
+                <h2>Complete Your Payment</h2>
+                <form id="payment-form">
+                    <div id="card-element"></div>
+                    <button onclick="prevStep()">Previous</button>
+                    <button id="submit-button" type="button">Pay</button>
+                </form>
+                
+            </div>
+            <div id="step-4" class="step-content">
+                <h2>Confirmation</h2>
+                <button onclick="prevStep()">Previous</button>
+                <button onclick="finish()">Finish</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        var stripe = Stripe('your_publishable_key');
+        var stripe = Stripe('pk_test_51PiACu2KT90gejSaVY7sj44CKFY5MNClPbit8R4AEhDnwu7N4vcveULSKO5G11W7ScQQq5WNDaBe3RMULoI8VM7K009vpMN8UX');
         var elements = stripe.elements();
-        var card = elements.create('card');
-        card.mount('#card-element');
-
-        function nextSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
-            document.getElementById(`${sectionId}-section`).classList.add('active');
+        var style = {
+    base: {
+        color: '#32325d',
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        fontSmoothing: 'antialiased',
+        fontSize: '16px',
+        '::placeholder': {
+            color: '#aab7c4'
         }
+    },
+    invalid: {
+        color: '#fa755a',
+        iconColor: '#fa755a'
+    }
+};
+        var cardElement = elements.create('card',{ style: style });
+        cardElement.mount('#card-element');
 
-        function submitPayment() {
-            stripe.createToken(card).then(function(result) {
-                if (result.error) {
-                    // Display error in #card-errors
-                    var errorElement = document.getElementById('card-errors');
-                    errorElement.textContent = result.error.message;
-                } else {
-                    // Handle successful payment
-                    var form = document.getElementById('payment-form');
-                    var hiddenInput = document.createElement('input');
-                    hiddenInput.setAttribute('type', 'hidden');
-                    hiddenInput.setAttribute('name', 'stripeToken');
-                    hiddenInput.setAttribute('value', result.token.id);
-                    form.appendChild(hiddenInput);
-                    
-                    // Simulate form submission to backend
-                    form.submit();
+        var form = document.getElementById('payment-form');
+        var submitButton = document.getElementById('submit-button');
+        var errorMessage = document.getElementById('error-message');
+        let currentStep = 1;
 
-                    // Show confirmation section
-                    nextSection('confirmation');
-                }
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach((el, index) => {
+                el.classList.toggle('active', index + 1 === step);
             });
+
+            document.querySelectorAll('.step').forEach((el, index) => {
+                el.classList.toggle('completed', index + 1 < step);
+            });
+
+            currentStep = step;
         }
+
+        function nextStep() {
+            if (currentStep < 4) {
+                showStep(currentStep + 1);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function finish() {
+            alert('Process completed!');
+            // Redirect or perform additional actions here
+        }
+
+        submitButton.addEventListener('click', async () => {
+            // Create a Payment Intent and get the client secret
+            const response = await fetch('/create-payment-intent/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount: 2000 }), // Amount in cents
+            });
+
+            const { client_secret } = await response.json();
+
+            // Confirm the payment
+            const { error, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
+                payment_method: {
+                    card: cardElement,
+                },
+            });
+
+            if (error) {
+                errorMessage.textContent = error.message;
+            } else if (paymentIntent.status === 'succeeded') {
+                console.log("success")
+                // window.location.href = '/payment-success/';
+                showStep(4);
+            }
+        });
+
+        
+
+        function goHome() {
+            window.location.href = '/';  // Redirect to home page
+        }
+
+        function goToCart() {
+            window.location.href = '/cart/';  // Redirect to cart page
+        }
+
+        function validateAddress() {
+            const addressForm = document.getElementById('address-form');
+            if (addressForm.checkValidity()) {
+                showStep(currentStep + 1);
+            } else {
+                addressForm.reportValidity();
+            }
+        }
+
+        showStep(currentStep);
     </script>
 </body>
+
 </html>

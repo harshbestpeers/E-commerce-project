@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Simple styling for the form */
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Complete Your Payment</h2>
+        <form id="payment-form">
+            <div id="card-element"></div>
+            <button id="submit-button" type="button">Pay</button>
+        </form>
+        <div id="error-message" role="alert"></div>
+    </div>
+
+    <script>
+        // Set your publishable key from the Stripe Dashboard
+        var stripe = Stripe('pk_test_51PiACu2KT90gejSaVY7sj44CKFY5MNClPbit8R4AEhDnwu7N4vcveULSKO5G11W7ScQQq5WNDaBe3RMULoI8VM7K009vpMN8UX');
+        var elements = stripe.elements();
+        var cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+
+        var form = document.getElementById('payment-form');
+        var submitButton = document.getElementById('submit-button');
+        var errorMessage = document.getElementById('error-message');
+
+        submitButton.addEventListener('click', async () => {
+            // Create a Payment Intent and get the client secret
+            const response = await fetch('/create-payment-intent/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount: 2000 }), // Amount in cents
+            });
+
+            const { client_secret } = await response.json();
+
+            // Confirm the payment
+            const { error, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
+                payment_method: {
+                    card: cardElement,
+                },
+            });
+
+            if (error) {
+                errorMessage.textContent = error.message;
+            } else if (paymentIntent.status === 'succeeded') {
+                console.log("success")
+                window.location.href = '/payment-success/';
+            }
+        });
+    </script>
+</body>
+</html>

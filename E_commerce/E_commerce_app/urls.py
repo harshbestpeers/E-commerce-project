@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from django.views.generic import TemplateView
+
 
 urlpatterns = [
     path("", Main, name="home"),
@@ -49,4 +51,8 @@ urlpatterns = [
     ),
     path("payment-success/", PaymentSuccess, name="payment-success"),
     path("payment-cancel/", PaymentCancel, name="payment-cancel"),
+
+
+    path('create-payment-intent/', create_payment_intent, name='create_payment_intent'),
+    path('payment-success/', PaymentSuccess, name='payment_success'),
 ]
