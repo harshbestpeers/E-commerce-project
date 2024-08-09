@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from decouple import Config, Csv, config
 from pathlib import Path
 import os
 
@@ -27,7 +27,12 @@ SECRET_KEY = "django-insecure-q=#k_j5#et5))#nvixcu1=t*7vp9_yavo7j^k3hcmln-jz3z1g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://61e0-60-254-111-210.ngrok-free.app'
+]
 
 
 # Application definition
@@ -78,7 +83,15 @@ WSGI_APPLICATION = "E_commerce.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    # "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DATABASE_NAME"),
+        "USER": config("DATABASE_USER"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
+        "HOST": config("DATABASE_HOST"),
+        "PORT": config("DATABASE_PORT", default=5432, cast=int),
+    }
 }
 
 
@@ -125,16 +138,13 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
-STRIPE_PUBLIC_KEY = 'pk_test_51PiACu2KT90gejSaVY7sj44CKFY5MNClPbit8R4AEhDnwu7N4vcveULSKO5G11W7ScQQq5WNDaBe3RMULoI8VM7K009vpMN8UX'
-STRIPE_SECRET_KEY = 'sk_test_51PiACu2KT90gejSamKD5TldwCzIhtBtD6zeG5OFbvPfUQAPhRQuYv1JgE7keYWVkBRGhpE9BgkGu7WPUduFZFFkr00ioYw2H50'
+STRIPE_PUBLIC_KEY = "pk_test_51PiACu2KT90gejSaVY7sj44CKFY5MNClPbit8R4AEhDnwu7N4vcveULSKO5G11W7ScQQq5WNDaBe3RMULoI8VM7K009vpMN8UX"
+STRIPE_SECRET_KEY = "sk_test_51PiACu2KT90gejSamKD5TldwCzIhtBtD6zeG5OFbvPfUQAPhRQuYv1JgE7keYWVkBRGhpE9BgkGu7WPUduFZFFkr00ioYw2H50"
 
 REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '2/day',
-        'user': '2/day'
-    }
+    "DEFAULT_THROTTLE_RATES": {"anon": "5/day", "user": "500/day"},
 }

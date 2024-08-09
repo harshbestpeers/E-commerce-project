@@ -3,6 +3,7 @@
 
 {% block head %}
 <title>Your Shopping Cart</title>
+<meta charset="UTF-8">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
     table {
@@ -50,17 +51,17 @@
         <tbody class="cart-item">
             {% for item in cart_items %}
             <tr data-product-id="{{ item.product.id }}">
-                <td id = "product_id" name="product_id" value="{{item.product.id}}">{{item.product.id}}</td>
+                <td id="product_id" name="product_id" value="{{item.product.id}}">{{item.product.id}}</td>
                 <td>{{ item.product.name }}</td>
                 <td>&#x20B9;
                     {{ item.product.price }}</td>
                 <td>
+
+                    <input type="number" id="quantity" name="quantity" data-id="{{item.product.id}}"
+                        value="{{ item.quantity }}" min="1" class="quantity">
                     
-                    <input type="number" name="quantity"  data-id="{{item.product.id}}" value="{{ item.quantity }}" min="1" class="cart-quantity">
-                    <button type="submit" class="update-button">Update</button>
-                
                 </td>
-                <td class="item-total-price" id="subtotal">&#x20B9;
+                <td class="subtotal" id="subtotal">&#x20B9;
                     {{ item.total_price }}</td>
                 <td>
                     <button class="remove_item" data-id="{{item.product.id}}">Remove</button>
@@ -75,73 +76,79 @@
     </table>
     <br>
     {% if cart_items %}
-    <div class="total">
+    <div class="tota">
         <h2 claa="cart-item-price">Total: &#x20B9;
-            <span id="total-price">{{ total_price }}</span></h2>
+            <span id="total-price" class="total">{{ total_price }}</span>
+        </h2>
         <br>
         <a href="{% url 'create-checkout-session' %}" class="btn btn-warning">Place Order</a>
     </div>
     {% endif %}
 </div>
-<div id="response"></div>
+
 <script>
-    $(document).on("change", ".cart-quantity", function(event) {
-        event.preventDefault();
+    document.querySelectorAll(".quantity").forEach(input => {
+        input.addEventListener("change", function() {
+            var quantity = this.value;
+            var id = this.getAttribute("data-id");
+            var row = this.closest("tr");
+            var subtotalPrice = row.querySelector(".subtotal");
+            var totalPrice = document.getElementById("total-price");
+            var responseElement = document.getElementById('response');
 
-        var cartId = $(this).data('id');
-        var quantity = $(this).val();
-        var fdata = JSON.stringify({ quantity: quantity });
+            console.log(quantity);
+            console.log(id);
+            console.log(totalPrice);
 
-        console.log('Cart ID:', cartId);
-        console.log('Quantity:', quantity);
-        console.log('Data to send:', fdata);
-
-        $.ajax({
-            url: "{% url 'update_cart' 1 %}".replace('1', cartId),
-            type: 'PUT',
-            data: fdata,
-            contentType: 'application/json',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            success: function(response) {
-                console.log('Success response:', response);
-                
-                $("#total-price").text(+response.total_price);
-                $("#subtotal").text(+response.subtotal);
-                $("#response").html('<div class="alert alert-success">Quantity successfully updated...</div>');
-            },
-            error: function(xhr, status, error) {
-                console.log('Error response:', xhr.responseText);
-                $("#response").html('<div class="alert alert-danger">' + error + ': ' + xhr.responseText + '</div>');
-            }
+            fetch("{% url 'update_cart' 1 %}".replace('1', id), {
+                method: 'PUT', // The request method
+                headers: {
+                    'Content-Type': 'application/json', // Specify that the request body is JSON
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token if needed
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json()) // Parse JSON response
+            .then(data => {
+                console.log('Success:', data); // Handle the data from the server
+                subtotalPrice.textContent = data.subtotal;
+                totalPrice.textContent = data.total_price;
+                responseElement.innerHTML = `<div class="alert alert-success">Quantity successfully updated.</div>`;
+            })
+            .catch(error => {
+                console.error('Error:', error); // Handle any errors
+                responseElement.innerHTML = `<div class="alert alert-danger">Error</div>`;
+            });
         });
     });
 
+    // Handle item removal
+    
+    document.querySelectorAll(".remove_item").forEach(button => {
+        button.addEventListener("click", function() {
+            var id = this.getAttribute("data-id");
+            var row = this.closest("tr");
+            var responseElement = document.getElementById('response');
 
-    $(document).on("click", ".remove_item", function(event) {
-        event.preventDefault();
-
-        var cartId = $(this).data('id');
-
-        $.ajax({
-            url: "{% url 'update_cart' 1 %}".replace('1', cartId),
-            type: 'DELETE',
-          
-            contentType: 'application/json',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            success: function(response) {
-                console.log('Success response:', response);
-                $("#response").html('<div class="alert alert-success">item successfully Remove...</div>');
-            },
-            error: function(xhr, status, error) {
-                console.log('Error response:', xhr.responseText);
-                $("#response").html('<div class="alert alert-danger">' + error + ': ' + xhr.responseText + '</div>');
-            }
+            fetch("{% url 'update_cart' 1 %}".replace('1', id), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'   
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                row.remove();
+                document.getElementById("total-price").textContent = data.total_price;
+                responseElement.innerHTML = `<div class="alert alert-success">Item removed successfully.</div>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                responseElement.innerHTML = `<div class="alert alert-danger">Error removing item.</div>`;
+            });
         });
     });
-
 </script>
+<div id="response"></div>
 {% endblock %}

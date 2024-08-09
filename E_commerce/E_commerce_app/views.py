@@ -157,40 +157,28 @@ class AddToCart(View):
         return redirect("cart_detail")
 
 
-# class UpdateCart(View):
-#     def post(self, request, product_id):
-#         cart = request.session.get("cart", {})
-#         if str(product_id) in cart:
-#             quantity = request.POST.get("quantity")
-#             if quantity:
-#                 cart[str(product_id)] = int(quantity)
-#                 request.session["cart"] = cart
-#         return redirect("cart_detail")
-
-#     def get(self, request, product_id):
-#         print("hello")
-#         return JsonResponse({"message":"hello"})
-
-
 class UpdateCart(View):
     def put(self, request, product_id):
-        print(product_id)
-        print("post")
         data = json.loads(request.body)
         quantity = data.get("quantity")
         cart = request.session.get("cart", {})
-        print(request.POST)
         if str(product_id) in cart:
-            print("running")
             if quantity:
-                print(quantity)
                 cart[str(product_id)] = int(quantity)
                 request.session["cart"] = cart
                 product = Product.objects.get(id=product_id)
                 subtotal = product.price * cart[str(product.id)]
                 print(subtotal)
 
+        cart = request.session.get("cart", {})
+        total_price = 0
+        for key, value in cart.items():
+            product = Product.objects.get(id=key)
+            total = product.price * cart[str(product.id)]
+            total_price += total
+
         context={
+            "total_price": total_price,
             "subtotal":subtotal,
             "success" : "updated successfully",
             # "total_price": sum(item["total_price"] for item in cart_item),
@@ -207,64 +195,21 @@ class UpdateCart(View):
         if str(product_id) in cart:
             del cart[str(product_id)]
             request.session["cart"] = cart
-        success = "remove successfully"
-        return HttpResponse(success)
 
-
-class RemoveFromCart(View):
-    def get(self, request, product_id):
         cart = request.session.get("cart", {})
-        if str(product_id) in cart:
-            del cart[str(product_id)]
-            request.session["cart"] = cart
-        return redirect("cart_detail")
+        total_price = 0
+        for key, value in cart.items():
+            product = Product.objects.get(id=key)
+            total = product.price * cart[str(product.id)]
+            total_price += total
 
+        context = {
+            "total_price":total_price,
+            "success":True,
+            
+        }
 
-# class PlaceOrder(View):
-#     def get(self, request):
-#         form = ShippingAddressForm()
-        
-#         id = request.session["id"]
-#         shipping = (
-#             ShippingAddress.objects.filter(customer=id)
-#             .values(
-#                 "customer__first_name",
-#                 "customer__last_name",
-#                 "city",
-#                 "address",
-#                 "state",
-#                 "zipcode",
-#             )
-#             .distinct()
-#         )
-#         print(shipping)
-#         context = {"shipping": shipping, "form": form}
-#         return render(request, "shipping.html", context)
-
-#     def post(self, request):
-#         id = request.session.get("id")
-#         customer = Customer.objects.get(id=id)
-#         transaction_id = datetime.now().timestamp()
-#         cart = request.session["cart"]
-
-#         form = ShippingAddressForm(request.POST)
-#         if form.is_valid():
-#             order = Order(customer=customer, transaction_id=transaction_id)
-#             order.save()
-
-#             for key, value in cart.items():
-#                 product = Product.objects.get(id=key)
-#                 order_item = OrderItem(order=order, product=product, quantity=value)
-#                 order_item.save()
-
-#             shipping_address = form.save(commit=False)
-#             shipping_address.customer = customer
-#             shipping_address.order = order
-#             shipping_address.save()
-
-#             request.session["cart"] = {}
-#             return render(request, "order_confirm.html")
-
+        return JsonResponse(context)
 
 class ProductAndImage(View):
     def post(self, request):
@@ -374,35 +319,10 @@ class Account(View):
         return render(request, "account.html", context)
 
 
+
+
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
-class PaymentView(View):
-    def get(self, request):
-        return render(request, 'payment.html', {
-            'stripe_public_key': settings.STRIPE_PUBLIC_KEY
-        })
-
-    def post(self, request):
-        amount = (request.POST.get('amount'))
-        name = (request.POST.get('name'))
-        amount = int(amount)
-        print(amount)
-        try:
-            charge = stripe.Charge.create(
-                amount=amount,
-                currency='usd',
-                source=request.POST['stripeToken']
-            )
-
-            
-
-            return redirect('payment')
-
-        except stripe.error.StripeError:
-            print("error")
-            return redirect('payment')
-
-
-
 class CreateCheckoutSessionView(generic.View):
     def post(self, request, *args, **kwargs):
         address = request.session.get("address",{})
@@ -458,6 +378,7 @@ class CreateCheckoutSessionView(generic.View):
         )
         
         return redirect(checkout_session.url, code=303)
+        # redirect("home")
         
 
     def get(self, request):
@@ -498,9 +419,6 @@ def PaymentSuccess(request):
         product = Product.objects.get(id=key)
         order_item = OrderItem(order=order, product=product, quantity=value)
         order_item.save()
-        product.quantity = int(product.quantity) - value
-
-
     context={
             "payment_status":"success"
     }
@@ -519,11 +437,6 @@ def PaymentCancel(request):
     }
     return render(request, "order/conformation.html", context)
 
-@csrf_exempt
-def my_webhooks_view(request):
-    pyload = request.body
-    print(payload)
-    return HttpResponse(status=200)
 
 
 # api
@@ -545,3 +458,39 @@ class OrderListCreate(generics.ListCreateAPIView):
 class OrderRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+def create_payment_intent(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve the amount from the request body
+            data = json.loads(request.body)
+            amount = data.get('amount', 2000)  # Default to $20.00 if no amount is provided
+
+            # Create a Payment Intent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='usd',
+                payment_method_types=['card'],
+                description='Payment for Order #1234',
+                metadata={'order_id': '1234'},
+            )
+
+            # Return the client secret to the client
+            return JsonResponse({
+                'client_secret': payment_intent.client_secret
+            })
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        # return JsonResponse({'error': 'Invalid request method'}, status=400)
+        return render(request, "dummy.html")
+
+
+def PaymentSuccess(request):
+    return render(request, "payment_success.html")
